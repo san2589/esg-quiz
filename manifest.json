@@ -1,0 +1,9 @@
+{
+  "name": "ESG 永續發展測驗",
+  "short_name": "ESG測驗",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#0f172a"
+}
