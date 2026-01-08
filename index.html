@@ -257,7 +257,7 @@
       const id = q.id ?? q.qid ?? q.no ?? (i + 1);
       const title = q.question ?? q.q ?? q.title ?? "";
       const options = q.a ?? q.options ?? q.choices ?? q.items ?? [];
-      const ansRaw = q.answer ?? q.a ?? q.correct ?? null;
+      const ansRaw = q.c ?? q.answer ?? q.correct ?? null;
 
       if(typeof title !== "string" || !title.trim()) throw new Error(`第 ${i+1} 題缺少題目文字`);
       if(!Array.isArray(options) || options.length < 2) throw new Error(`第 ${i+1} 題選項數不足`);
