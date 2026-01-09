@@ -262,21 +262,27 @@
       if(typeof title !== "string" || !title.trim()) throw new Error(`第 ${i+1} 題缺少題目文字`);
       if(!Array.isArray(options) || options.length < 2) throw new Error(`第 ${i+1} 題選項數不足`);
 
-      // 答案索引容錯：支援 0-based / 1-based
+      // 答案索引：固定採 1-based（1~N），並支援 "A"/"B"/...
       let ansIndex = null;
-      if(typeof ansRaw === "number"){
-        if(ansRaw >= 0 && ansRaw < options.length) ansIndex = ansRaw;
-        else if(ansRaw >= 1 && ansRaw <= options.length) ansIndex = ansRaw - 1;
-      } else if(typeof ansRaw === "string"){
-        // 若答案是 "A"/"B"/...
-        const t = ansRaw.trim().toUpperCase();
-        const code = t.charCodeAt(0) - 65;
-        if(code >= 0 && code < options.length) ansIndex = code;
-      }
 
-      return { id, title, options, ansIndex };
-    });
+      if (typeof ansRaw === "number") {
+      // 只接受 1~options.length
+      if (Number.isInteger(ansRaw) && ansRaw >= 1 && ansRaw <= options.length) {
+      ansIndex = ansRaw - 1; // 1-based → 0-based index
+      }
+      } else if (typeof ansRaw === "string") {
+      const t = ansRaw.trim().toUpperCase();
+
+  // 若答案是 "1"~"N"
+  const n = Number(t);
+  if (Number.isInteger(n) && n >= 1 && n <= options.length) {
+    ansIndex = n - 1;
+  } else {
+    // 若答案是 "A"/"B"/...
+    const code = t.charCodeAt(0) - 65;
+    if (code >= 0 && code < options.length) ansIndex = code;
   }
+}
 
   // ====== Order / Shuffle ======
   function mulberry32(seed){
