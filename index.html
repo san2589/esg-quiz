@@ -273,11 +273,11 @@
       } else if (typeof ansRaw === "string") {
       const t = ansRaw.trim().toUpperCase();
 
-  // 若答案是 "1"~"N"
-  const n = Number(t);
-  if (Number.isInteger(n) && n >= 1 && n <= options.length) {
-    ansIndex = n - 1;
-  } else {
+      // 若答案是 "1"~"N"
+      const n = Number(t);
+      if (Number.isInteger(n) && n >= 1 && n <= options.length) {
+      ansIndex = n - 1;
+      } else {
     // 若答案是 "A"/"B"/...
     const code = t.charCodeAt(0) - 65;
     if (code >= 0 && code < options.length) ansIndex = code;
