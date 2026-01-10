@@ -545,21 +545,23 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
       }
 
     }catch(err){
-      console.error(err);
-      setStatus("載入失敗", "err");
-      btnRetry.style.display = "inline-block";
-      elArea.innerHTML = `
-        <div style="font-weight:900; font-size:16px; color:#ffd2d2;">題庫載入失敗</div>
-        <div class="muted" style="margin-top:8px; line-height:1.7;">
-          可能原因：<br/>
-          1) questions.json 路徑不對（目前：<span class="kbd">${QUESTIONS_URL}</span>）<br/>
-          2) GitHub Pages 尚未更新 / 快取<br/>
-          3) 題庫 JSON 格式不符合（需為 Array）<br/>
-          <br/>
-          錯誤訊息：<span class="kbd">${escapeHtml(String(err?.message || err))}</span>
-        </div>
-      `;
-    }
+    console.error(err);
+    setStatus("載入失敗", "err");
+    btnRetry.style.display = "inline-block";
+
+    const msg = (err && err.message) ? err.message : String(err);
+
+    elArea.innerHTML = `
+      <div style="font-weight:900; font-size:16px; color:#ffd2d2;">題庫載入失敗</div>
+      <div class="muted" style="margin-top:8px; line-height:1.7;">
+        可能原因：<br/>
+        1) questions.json 路徑不對（目前：<span class="kbd">${QUESTIONS_URL}</span>）<br/>
+        2) GitHub Pages 尚未更新 / 快取<br/>
+        3) 題庫 JSON 格式不符合（需為 Array）<br/>
+        <br/>
+        錯誤訊息：<span class="kbd">${escapeHtml(msg)}</span>
+      </div>
+    `;
   }
 
   init();
