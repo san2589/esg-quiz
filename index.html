@@ -163,6 +163,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
   // ====== 可調整設定 ======
   const APP_VERSION = "1.0.9";         // 每次上線更新可改這裡（方便辨識＆快取策略）
   const QUESTIONS_URL = "./questions_all.json";
+  const PICK_COUNT = 80;
   const FETCH_TIMEOUT_MS = 12000;
 
   // ====== DOM ======
@@ -546,7 +547,7 @@ function normalizeQuestions(raw){
         }
       }
 
-      questions = normalizeQuestions(raw);
+      questions = normalizeQuestions(raw).slice(0, PICK_COUNT);
       if(!questions.length) throw new Error("題庫為空");
 
       // 初始化 order
