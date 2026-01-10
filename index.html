@@ -161,7 +161,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
 <script>
 (() => {
   // ====== 可調整設定 ======
-  const APP_VERSION = "1.0.10";         // 每次上線更新可改這裡（方便辨識＆快取策略）
+  const APP_VERSION = "1.0.11";         // 每次上線更新可改這裡（方便辨識＆快取策略）
   const QUESTIONS_URL = "./questions_all.json";
   const PICK_COUNT = 80;
   const LS_DRAW = "esg_draw_80_v1";
@@ -493,6 +493,7 @@ function normalizeQuestions(raw){
   }
 
   function resetProgress(){
+    localStorage.removeItem(LS_DRAW);
     state = defaultState();
     saveState();
     buildViewOrder();
@@ -548,7 +549,40 @@ function normalizeQuestions(raw){
         }
       }
 
-      questions = normalizeQuestions(raw).slice(0, PICK_COUNT);
+      const all = normalizeQuestions(raw);
+
+// 讀取已抽到的題目 id（避免重整就換題）
+let drawIds = null;
+try {
+  drawIds = JSON.parse(localStorage.getItem(LS_DRAW) || "null");
+} catch (e) {
+  drawIds = null;
+}
+
+// 如果沒有抽過，就抽一組新的 80 題 id 並存起來
+if (!Array.isArray(drawIds) || drawIds.length !== PICK_COUNT) {
+  const ids = all.map(q => q.id);
+
+  // Fisher-Yates shuffle（用 crypto，比 Math.random 穩）
+  for (let i = ids.length - 1; i > 0; i--) {
+    const r = crypto.getRandomValues(new Uint32Array(1))[0];
+    const j = r % (i + 1);
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+  }
+
+  drawIds = ids.slice(0, PICK_COUNT);
+  localStorage.setItem(LS_DRAW, JSON.stringify(drawIds));
+}
+
+// 依照 drawIds 組回本次要作答的 80 題（保持抽到的順序）
+const map = new Map(all.map(q => [q.id, q]));
+questions = drawIds.map(id => map.get(id)).filter(Boolean);
+
+// 防呆：如果題庫變動導致對不上，就重抽一次
+if (questions.length !== PICK_COUNT) {
+  localStorage.removeItem(LS_DRAW);
+  questions = all.slice(0, PICK_COUNT);
+}
       if(!questions.length) throw new Error("題庫為空");
 
       // 初始化 order
