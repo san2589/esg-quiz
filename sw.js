@@ -4,7 +4,7 @@
  * - Version bump => auto clear old caches
  */
 
-const CACHE_VERSION = "v1.0.7"; // ← 每次上線更新時，改這個版本號
+const CACHE_VERSION = "v1.0.8"; // ← 每次上線更新時，改這個版本號
 const APP_SHELL_CACHE = `esg-appshell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `esg-runtime-${CACHE_VERSION}`;
 
