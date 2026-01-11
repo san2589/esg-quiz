@@ -121,9 +121,10 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
         <div class="row" style="margin-top:14px; justify-content:space-between;">
           <button class="btn2 btn" id="btnPrev" disabled>上一題</button>
           <div class="row">
-            <button class="btn2 btn" id="btnReveal" disabled>看答案</button>
-            <button class="btn" id="btnNext" disabled>下一題</button>
-          </div>
+         <button class="btn2 btn" id="btnReveal" disabled>看答案</button>
+         <button class="btn2 btn" id="btnSubmit">交卷</button>
+         <button class="btn" id="btnNext" disabled>下一題</button>
+         </div>
         </div>
       </div>
 
@@ -161,7 +162,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
 <script>
 (() => {
   // ====== 可調整設定 ======
-  const APP_VERSION = "1.0.15";         // 每次上線更新可改這裡（方便辨識＆快取策略）
+  const APP_VERSION = "1.0.16";         // 每次上線更新可改這裡（方便辨識＆快取策略）
   const QUESTIONS_URL = "./questions_all.json";
   const PICK_COUNT = 80;
   const LS_DRAW = `esg_draw_80_v1_${APP_VERSION}_${PICK_COUNT}`;
@@ -177,6 +178,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
   const elScore = document.getElementById("scoreText");
   const elArea = document.getElementById("questionArea");
   const elToast = document.getElementById("toast");
+  const btnSubmit = document.getElementById("btnSubmit");
 
   const btnPrev = document.getElementById("btnPrev");
   const btnNext = document.getElementById("btnNext");
@@ -506,7 +508,24 @@ function maybeFinishAndSave(){
   // 結算後刷新一次畫面（讓上次得分能顯示在右上角）
   render();
 }
+function submitNow(){
+  if(!questions.length) return;
+  const r = computeFinalScore();
 
+  localStorage.setItem(LS_LAST_SCORE, JSON.stringify({
+    score: r.score,
+    correct: r.correct,
+    total: r.total,
+    pass: r.pass,
+    at: Date.now()
+  }));
+
+  alert(`交卷完成！\n得分：${r.score} 分\n正確：${r.correct}/${r.total}\n${r.pass ? "✅ 及格（70）" : "❌ 未及格（70）"}`);
+  render();
+}
+
+  // ====== Answer logic ======
+  function onChoose(optIndex){
   // ====== Answer logic ======
   function onChoose(optIndex){
     const q = currentQuestion();
@@ -578,6 +597,7 @@ function maybeFinishAndSave(){
   btnPrev.addEventListener("click", prev);
   btnNext.addEventListener("click", next);
   btnReveal.addEventListener("click", reveal);
+  btnSubmit.addEventListener("click", submitNow);
   btnReset.addEventListener("click", resetProgress);
   btnRetry.addEventListener("click", init);
 
@@ -644,8 +664,13 @@ if (!Array.isArray(drawIds) || drawIds.length !== PICK_COUNT) {
     [ids[i], ids[j]] = [ids[j], ids[i]];
   }
 
-  drawIds = ids.slice(0, PICK_COUNT);
-  localStorage.setItem(LS_DRAW, JSON.stringify(drawIds));
+drawIds = ids.slice(0, PICK_COUNT);
+localStorage.setItem(LS_DRAW, JSON.stringify(drawIds));
+
+// ✅ 新抽一批題目 → 進度回到第 1 題
+state.idx = 0;
+state.finished = false;
+saveState();
 }
 
 // 依照 drawIds 組回本次要作答的 80 題（保持抽到的順序）
