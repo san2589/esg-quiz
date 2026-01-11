@@ -161,7 +161,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
 <script>
 (() => {
   // ====== 可調整設定 ======
-  const APP_VERSION = "1.0.14";         // 每次上線更新可改這裡（方便辨識＆快取策略）
+  const APP_VERSION = "1.0.15";         // 每次上線更新可改這裡（方便辨識＆快取策略）
   const QUESTIONS_URL = "./questions_all.json";
   const PICK_COUNT = 80;
   const LS_DRAW = `esg_draw_80_v1_${APP_VERSION}_${PICK_COUNT}`;
@@ -204,7 +204,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     idx: 0,
     answers: {},           // {questionId: chosenIndex}
     reveal: {},            // {questionId: true}
-    stats: { correct: 0, wrong: 0 }
+    stats: { correct: 0, wrong: 0 },
     finished: false
   });
 
