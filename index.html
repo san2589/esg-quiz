@@ -161,10 +161,11 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
 <script>
 (() => {
   // ====== 可調整設定 ======
-  const APP_VERSION = "1.0.13";         // 每次上線更新可改這裡（方便辨識＆快取策略）
+  const APP_VERSION = "1.0.14";         // 每次上線更新可改這裡（方便辨識＆快取策略）
   const QUESTIONS_URL = "./questions_all.json";
   const PICK_COUNT = 80;
   const LS_DRAW = `esg_draw_80_v1_${APP_VERSION}_${PICK_COUNT}`;
+  const LS_LAST_SCORE = "esg_last_score_v1";
   const FETCH_TIMEOUT_MS = 12000;
 
   // ====== DOM ======
@@ -204,6 +205,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     answers: {},           // {questionId: chosenIndex}
     reveal: {},            // {questionId: true}
     stats: { correct: 0, wrong: 0 }
+    finished: false
   });
 
   let state = loadState();
@@ -374,7 +376,9 @@ function normalizeQuestions(raw){
   elProgress.textContent = `第 ${cur} / ${total} 題（題庫ID：${qid}，題庫共 ${bank} 題）`;
   elBar.style.width = total ? `${(cur / total) * 100}%` : "0%";
 
-  elScore.textContent = `正確 ${state.stats.correct}・錯誤 ${state.stats.wrong}`;
+  const last = loadLastScore();
+  const lastText = last ? `｜上次得分 ${last.score} 分（${last.pass ? "及格" : "未及格"}）` : "";
+  elScore.textContent = `正確 ${state.stats.correct}・錯誤 ${state.stats.wrong}${lastText}`;
 }
 
   function render(){
@@ -445,6 +449,64 @@ function normalizeQuestions(raw){
     }[c]));
   }
 
+  function loadLastScore(){
+  try{
+    const raw = localStorage.getItem(LS_LAST_SCORE);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){
+    return null;
+  }
+}
+
+// 計分規則：每題 1.25 分；80 題滿分 100；70 及格
+function computeFinalScore(){
+  let correct = 0;
+  let answered = 0;
+
+  for(const q of questions){
+    const a = state.answers[q.id];
+    if(a === undefined) continue;
+    answered += 1;
+    if(q.ansIndex !== null && a === q.ansIndex) correct += 1;
+  }
+
+  const score = Math.round((correct * 1.25) * 100) / 100; // 兩位小數
+  const pass = score >= 70;
+
+  return { correct, answered, total: questions.length, score, pass };
+}
+
+function maybeFinishAndSave(){
+  if(!questions.length) return;
+
+  const r = computeFinalScore();
+
+  // 尚未全部作答就不結算
+  if(r.answered !== r.total) return;
+
+  // 已結算過就不重複彈出
+  if(state.finished) return;
+
+  state.finished = true;
+  saveState();
+
+  // 記錄上次得分
+  localStorage.setItem(LS_LAST_SCORE, JSON.stringify({
+    score: r.score,
+    correct: r.correct,
+    total: r.total,
+    pass: r.pass,
+    at: Date.now()
+  }));
+
+  // 先用 alert（最簡單、最穩）；你要美化成卡片我再幫你做
+  alert(`作答完成！\n得分：${r.score} 分\n正確：${r.correct}/${r.total}\n${r.pass ? "✅ 及格（70）" : "❌ 未及格（70）"}`);
+
+  // 結算後刷新一次畫面（讓上次得分能顯示在右上角）
+  render();
+}
+
   // ====== Answer logic ======
   function onChoose(optIndex){
     const q = currentQuestion();
@@ -464,6 +526,7 @@ function normalizeQuestions(raw){
 
     saveState();
     render();
+    maybeFinishAndSave();
   }
 
   function reveal(){
