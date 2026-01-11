@@ -161,7 +161,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
 <script>
 (() => {
   // ====== 可調整設定 ======
-  const APP_VERSION = "1.0.11";         // 每次上線更新可改這裡（方便辨識＆快取策略）
+  const APP_VERSION = "1.0.12";         // 每次上線更新可改這裡（方便辨識＆快取策略）
   const QUESTIONS_URL = "./questions_all.json";
   const PICK_COUNT = 80;
   const LS_DRAW = `esg_draw_80_v1_${APP_VERSION}_${PICK_COUNT}`;
@@ -290,7 +290,8 @@ function normalizeQuestions(raw){
 
   return raw.map((q, i) => {
     const id = q.id ?? q.qid ?? q.no ?? (i + 1);
-    const title = (q.question ?? q.q ?? q.title ?? "").toString();
+    let title = (q.question ?? q.q ?? q.title ?? "").toString();
+    title = title.replace(/^\s*\d+\s*[.)、．]\s*/, ""); // 去掉開頭像「12. 」或「12、」
     const options = q.a ?? q.options ?? q.choices ?? q.items ?? [];
     const ansRaw = q.c ?? q.answer ?? q.correct ?? null;
 
