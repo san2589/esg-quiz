@@ -1,175 +1,116 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0f766e" />
-  <title>ESG 永續發展測驗</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ESG 永續發展測驗</title>
 
-  <link rel="manifest" href="./manifest.json" />
-  <link rel="icon" href="./icon.png" />
-
-  <style>
-    body{
-      margin:0;
-      font-family: system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;
-      background:#0b1220;
-      color:#e5e7eb;
-    }
-    .wrap{max-width:900px;margin:auto;padding:16px;}
-    .card{background:#121a2a;border-radius:16px;padding:16px;margin-bottom:16px;}
-    .muted{color:#94a3b8;font-size:14px;}
-    .opt{
-      width:100%;margin:8px 0;padding:12px;
-      border-radius:12px;border:1px solid #334155;
-      background:#020617;color:#e5e7eb;
-      cursor:pointer;text-align:left;
-    }
-    .opt.selected{outline:2px solid #14b8a6;}
-    .btn{
-      padding:10px 14px;border-radius:12px;
-      border:1px solid #334155;
-      background:#020617;color:#e5e7eb;
-      cursor:pointer;
-    }
-    .btn:disabled{opacity:.4;cursor:not-allowed;}
-    .barwrap{height:10px;background:#1e293b;border-radius:999px;overflow:hidden;}
-    .bar{height:100%;width:0%;background:#14b8a6;}
-  </style>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Noto Sans TC";background:#0b1220;color:#e5e7eb}
+.wrap{max-width:900px;margin:auto;padding:16px}
+.card{background:#121a2a;border-radius:16px;padding:16px;margin-bottom:16px}
+.muted{color:#94a3b8}
+.barwrap{height:10px;background:#1e293b;border-radius:999px;overflow:hidden}
+.bar{height:100%;width:0%;background:#14b8a6}
+.opt{width:100%;padding:12px;margin:8px 0;border-radius:12px;border:1px solid #334155;background:#020617;color:#e5e7eb;text-align:left;cursor:pointer}
+.opt.selected{outline:2px solid #14b8a6}
+.btn{padding:10px 14px;border-radius:12px;border:1px solid #334155;background:#020617;color:#e5e7eb;cursor:pointer}
+.btn:disabled{opacity:.4}
+.scoreCard{border:2px solid #14b8a6;border-radius:12px;padding:16px;margin-top:12px}
+.fail{border-color:#ef4444}
+</style>
 </head>
 
 <body>
 <div class="wrap">
 
-  <div class="card">
-    <h2>ESG 永續發展測驗</h2>
-    <div class="muted" id="status">初始化中…</div>
-  </div>
+<div class="card">
+<h2>ESG 永續發展測驗</h2>
+<div class="muted" id="status">初始化中…</div>
+</div>
 
-  <div class="card">
-    <div class="barwrap"><div class="bar" id="bar"></div></div>
-    <div class="muted" id="progressText" style="margin-top:8px;"></div>
-    <div class="muted" id="scoreText"></div>
-  </div>
+<div class="card">
+<div class="barwrap"><div class="bar" id="bar"></div></div>
+<div class="muted" id="progress"></div>
+</div>
 
-  <div class="card" id="questionArea">載入題庫中…</div>
+<div class="card" id="questionArea">載入題庫中…</div>
 
-  <div class="card">
-    <button class="btn" id="btnPrev">上一題</button>
-    <button class="btn" id="btnNext">下一題</button>
-    <button class="btn" id="btnSubmit">交卷</button>
-    <button class="btn" id="btnReset">重來</button>
-  </div>
+<div class="card">
+<button class="btn" id="prev">上一題</button>
+<button class="btn" id="next">下一題</button>
+<button class="btn" id="submit">交卷</button>
+<button class="btn" id="reset">重來</button>
+</div>
 
 </div>
 
 <script>
 (() => {
-  const QUESTIONS_URL = "./questions_all.json";
-  const PICK_COUNT = 80;
-  const POINT = 1.25;
-  const PASS = 70;
-  const LS_KEY = "esg_exam_v1";
+const URL="./questions_all.json";
+const PICK=80,POINT=1.25,PASS=70;
+const LS="esg_exam_v1";
 
-  const elStatus = document.getElementById("status");
-  const elArea = document.getElementById("questionArea");
-  const elProgress = document.getElementById("progressText");
-  const elScore = document.getElementById("scoreText");
-  const elBar = document.getElementById("bar");
+const elStatus=status;
+const elQ=questionArea;
+const elP=progress;
+const elBar=bar;
 
-  const btnPrev = document.getElementById("btnPrev");
-  const btnNext = document.getElementById("btnNext");
-  const btnSubmit = document.getElementById("btnSubmit");
-  const btnReset = document.getElementById("btnReset");
+let bank=[],exam=[],idx=0,ans={},done=false;
 
-  let bank = [];
-  let exam = [];
-  let idx = 0;
-  let answers = {};
-  let finished = false;
+function save(){localStorage.setItem(LS,JSON.stringify({exam,idx,ans,done}))}
+function load(){try{Object.assign({},{},JSON.parse(localStorage.getItem(LS)||"{}"),{exam,idx,ans,done})}catch{}}
 
-  function save(){
-    localStorage.setItem(LS_KEY, JSON.stringify({exam,idx,answers,finished}));
-  }
-  function load(){
-    try{
-      const d = JSON.parse(localStorage.getItem(LS_KEY));
-      if(d){
-        exam=d.exam;idx=d.idx;answers=d.answers;finished=d.finished;
-      }
-    }catch{}
-  }
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
-  function shuffle(a){
-    for(let i=a.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [a[i],a[j]]=[a[j],a[i]];
-    }
-    return a;
-  }
+function cur(){return exam[idx]}
 
-  function current(){ return exam[idx]; }
+function render(){
+const q=cur();
+elP.textContent=`第 ${idx+1} / ${exam.length} 題（題庫ID：${q.id}，題庫共 ${bank.length} 題）`;
+elBar.style.width=`${((idx+1)/exam.length)*100}%`;
+elQ.innerHTML=`<h3>${q.q}</h3>`+
+q.a.map((t,i)=>`<button class="opt ${ans[q.id]===i?"selected":""}" data-i="${i}">${t}</button>`).join("");
 
-  function render(){
-    const q=current();
-    elProgress.textContent =
-      `第 ${idx+1} / ${exam.length} 題（題庫ID：${q.id}，題庫共 ${bank.length} 題）`;
-    elBar.style.width = `${((idx+1)/exam.length)*100}%`;
+elQ.querySelectorAll(".opt").forEach(b=>{
+b.onclick=()=>{if(done)return;ans[q.id]=+b.dataset.i;save();render();}
+});
+prev.disabled=idx===0;
+next.disabled=idx===exam.length-1;
+}
 
-    elArea.innerHTML = `
-      <h3>${q.q}</h3>
-      ${q.a.map((t,i)=>`
-        <button class="opt ${answers[q.id]===i?"selected":""}" data-i="${i}">${t}</button>
-      `).join("")}
-    `;
+function submit(){
+let correct=0;
+exam.forEach(q=>{if(ans[q.id]===q.c)correct++});
+const score=(correct*POINT).toFixed(2);
+done=true;save();
+elQ.innerHTML+=`<div class="scoreCard ${score<PASS?"fail":""}">
+<h3>成績：${score} 分</h3>
+<div>${score>=PASS?"✅ 及格":"❌ 未及格"}</div>
+<div>正確 ${correct} / ${exam.length}</div>
+</div>`;
+}
 
-    elArea.querySelectorAll(".opt").forEach(b=>{
-      b.onclick=()=>{
-        if(finished) return;
-        answers[q.id]=Number(b.dataset.i);
-        save();render();
-      };
-    });
+async function init(){
+elStatus.textContent="載入題庫…";
+const r=await fetch(URL,{cache:"no-store"});
+bank=await r.json();
 
-    btnPrev.disabled = idx===0;
-    btnNext.disabled = idx===exam.length-1;
-  }
+load();
+if(!exam.length){
+exam=shuffle([...bank]).slice(0,PICK);
+idx=0;ans={};done=false;save();
+}
+elStatus.textContent="題庫就緒";
+render();
+}
 
-  function submit(){
-    let correct=0;
-    exam.forEach(q=>{
-      if(answers[q.id]===q.c) correct++;
-    });
-    const score = correct*POINT;
-    finished=true;
-    save();
-    alert(`得分 ${score} 分\n${score>=PASS?"✅及格":"❌未及格"}`);
-    elScore.textContent=`得分：${score} 分`;
-  }
+prev.onclick=()=>{idx--;save();render()};
+next.onclick=()=>{idx++;save();render()};
+submit.onclick=submit;
+reset.onclick=()=>{localStorage.removeItem(LS);location.reload()};
 
-  async function init(){
-    elStatus.textContent="載入題庫…";
-    load();
-    if(!exam.length){
-      const res=await fetch(QUESTIONS_URL,{cache:"no-store"});
-      bank=await res.json();
-      exam = shuffle([...bank]).slice(0,PICK_COUNT);
-      idx=0;answers={};finished=false;
-      save();
-    }else{
-      const res=await fetch(QUESTIONS_URL,{cache:"no-store"});
-      bank=await res.json();
-    }
-    elStatus.textContent="題庫就緒";
-    render();
-  }
-
-  btnPrev.onclick=()=>{if(idx>0){idx--;save();render();}};
-  btnNext.onclick=()=>{if(idx<exam.length-1){idx++;save();render();}};
-  btnSubmit.onclick=submit;
-  btnReset.onclick=()=>{localStorage.removeItem(LS_KEY);location.reload();};
-
-  init();
+init();
 })();
 </script>
 </body>
