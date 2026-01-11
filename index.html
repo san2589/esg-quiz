@@ -11,41 +11,59 @@
   <link rel="icon" href="./icon.png" />
 
   <style>
-    :root { --bg:#0b1220; --card:#121a2a; --muted:#94a3b8; --text:#e5e7eb; --brand:#14b8a6; --danger:#ef4444; }
+    :root { --bg:#0b1220; --card:#121a2a; --muted:#94a3b8; --text:#e5e7eb; --brand:#14b8a6; --danger:#ef4444; --ok:#22c55e; }
     *{ box-sizing:border-box; }
     body{ margin:0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial;
           background:linear-gradient(180deg,#071023,#0b1220 40%); color:var(--text); }
-    .wrap{ max-width:980px; margin:0 auto; padding:16px; }
+    .wrap{ max-width:1100px; margin:0 auto; padding:16px; }
     .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; }
-    .brand{ font-weight:800; letter-spacing:.5px; }
+    .brand{ font-weight:900; letter-spacing:.5px; }
     .pill{ font-size:12px; color:#b6c2d6; background:rgba(148,163,184,.12); border:1px solid rgba(148,163,184,.22);
-          padding:6px 10px; border-radius:999px; }
+          padding:6px 10px; border-radius:999px; display:inline-flex; gap:8px; align-items:center; }
     .card{ background:rgba(18,26,42,.92); border:1px solid rgba(148,163,184,.18);
           border-radius:16px; padding:16px; box-shadow: 0 10px 30px rgba(0,0,0,.28); }
-    .row{ display:flex; gap:12px; flex-wrap:wrap; }
-    .grow{ flex:1 1 320px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .grid{ display:grid; grid-template-columns:1fr; gap:12px; }
+    @media (min-width: 920px){ .grid{ grid-template-columns: 1.25fr .75fr; } }
+
     .muted{ color:var(--muted); }
+    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+          font-size:12px; padding:2px 6px; border-radius:8px; border:1px solid rgba(148,163,184,.25); background:rgba(2,6,23,.35); color:#d6dee9; }
     .btn{ appearance:none; border:0; border-radius:12px; padding:10px 12px; cursor:pointer;
-          background:rgba(20,184,166,.14); color:#c7fff6; border:1px solid rgba(20,184,166,.45); font-weight:700; }
+          background:rgba(20,184,166,.14); color:#c7fff6; border:1px solid rgba(20,184,166,.45); font-weight:800; }
     .btn:hover{ filter:brightness(1.05); }
     .btn:disabled{ opacity:.45; cursor:not-allowed; }
-    .btn2{ background:rgba(148,163,184,.12); border:1px solid rgba(148,163,184,.28); color:#e5e7eb; }
-    .btnDanger{ background:rgba(239,68,68,.14); border:1px solid rgba(239,68,68,.45); color:#ffd2d2; }
+    .btn2{ background:rgba(148,163,184,.12); border:1px solid rgba(148,163,184,.28); color:#e5e7eb; font-weight:800; }
+    .btnDanger{ background:rgba(239,68,68,.14); border:1px solid rgba(239,68,68,.45); color:#ffd2d2; font-weight:900; }
+    .btnOk{ background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.45); color:#d6ffe2; font-weight:900; }
+
+    .progress{ height:10px; background:rgba(148,163,184,.14); border-radius:999px; overflow:hidden; border:1px solid rgba(148,163,184,.18); }
+    .bar{ height:100%; width:0%; background:linear-gradient(90deg, rgba(20,184,166,.85), rgba(34,197,94,.85)); }
+
     .opt{ width:100%; text-align:left; padding:12px 12px; border-radius:14px; border:1px solid rgba(148,163,184,.22);
           background:rgba(2,6,23,.35); color:var(--text); cursor:pointer; }
     .opt:hover{ border-color:rgba(20,184,166,.6); }
     .opt.selected{ outline:2px solid rgba(20,184,166,.8); border-color:rgba(20,184,166,.8); }
     .opt.correct{ outline:2px solid rgba(34,197,94,.85); border-color:rgba(34,197,94,.85); }
     .opt.wrong{ outline:2px solid rgba(239,68,68,.9); border-color:rgba(239,68,68,.9); }
-    .progress{ height:10px; background:rgba(148,163,184,.14); border-radius:999px; overflow:hidden; border:1px solid rgba(148,163,184,.18); }
-    .bar{ height:100%; width:0%; background:linear-gradient(90deg, rgba(20,184,166,.85), rgba(34,197,94,.85)); }
-    .grid{ display:grid; grid-template-columns:1fr; gap:12px; }
-    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-          font-size:12px; padding:2px 6px; border-radius:8px; border:1px solid rgba(148,163,184,.25); background:rgba(2,6,23,.35); color:#d6dee9; }
-    @media (min-width: 880px){ .grid{ grid-template-columns: 1.2fr .8fr; } }
+
     .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:16px; padding:10px 12px;
             background:rgba(2,6,23,.82); border:1px solid rgba(148,163,184,.25); border-radius:12px; color:#e5e7eb;
-            max-width: 92vw; box-shadow: 0 10px 30px rgba(0,0,0,.35); display:none; }
+            max-width: 92vw; box-shadow: 0 10px 30px rgba(0,0,0,.35); display:none; z-index:9998; }
+
+    .divider{ height:1px; background:rgba(148,163,184,.18); margin:12px 0; }
+
+    .miniGrid{ display:grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap:6px; }
+    @media (max-width: 520px){ .miniGrid{ grid-template-columns: repeat(8, minmax(0, 1fr)); } }
+    .qdot{
+      border-radius:10px; padding:6px 0; text-align:center; font-size:12px;
+      border:1px solid rgba(148,163,184,.22); background:rgba(2,6,23,.35); color:#d6dee9;
+      cursor:pointer; user-select:none;
+    }
+    .qdot.active{ outline:2px solid rgba(20,184,166,.7); }
+    .qdot.ok{ border-color: rgba(34,197,94,.6); background: rgba(34,197,94,.10); color:#d6ffe2; }
+    .qdot.bad{ border-color: rgba(239,68,68,.7); background: rgba(239,68,68,.10); color:#ffd2d2; }
+    .qdot.na{ border-color: rgba(148,163,184,.28); background: rgba(148,163,184,.10); color:#d6dee9; opacity:.9; }
   </style>
 </head>
 
@@ -84,17 +102,22 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     <div class="topbar">
       <div>
         <div class="brand">ESG 永續發展測驗</div>
-        <div class="muted" style="font-size:12px;">正式上線版（fetch 題庫・穩定版）</div>
+        <div class="muted" style="font-size:12px;">一次到位版：成績分析 + 考試倒數 + 錯題本</div>
       </div>
-      <div class="pill" id="statusPill">初始化中…</div>
+      <div class="pill" id="statusPill">
+        <span id="statusText">初始化中…</span>
+        <span class="kbd" id="timerText" style="display:none;">--:--</span>
+      </div>
     </div>
 
     <div class="grid">
-      <div class="card grow">
+      <!-- Left -->
+      <div class="card">
         <div class="row" style="align-items:center; justify-content:space-between;">
           <div class="muted" style="font-size:13px;">
             題庫：<span class="kbd" id="qSource">./questions_all.json</span>
             <span style="margin-left:8px;">版本：<span class="kbd" id="appVer"></span></span>
+            <span style="margin-left:8px;">本回合：<span class="kbd" id="sessionText">一般</span></span>
           </div>
           <div class="row">
             <button class="btn2 btn" id="btnRetry" style="display:none;">重新載入題庫</button>
@@ -106,7 +129,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
           <div class="progress"><div class="bar" id="bar"></div></div>
           <div class="row" style="justify-content:space-between; margin-top:8px;">
             <div class="muted" id="progressText">0 / 0</div>
-            <div class="muted" id="scoreText">正確 0・錯誤 0</div>
+            <div class="muted" id="scoreText">正確 0・錯誤 0・未作答 0</div>
           </div>
         </div>
 
@@ -124,8 +147,9 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
         </div>
       </div>
 
+      <!-- Right -->
       <div class="card">
-        <div style="font-weight:800; margin-bottom:10px;">設定</div>
+        <div style="font-weight:900; margin-bottom:10px;">設定 / 工具</div>
 
         <label style="display:block; margin:10px 0 6px;" class="muted">模式</label>
         <div class="row">
@@ -133,21 +157,61 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
           <button class="btn2 btn" id="modeExam">考試模式</button>
         </div>
 
-        <label style="display:block; margin:14px 0 6px;" class="muted">題目順序</label>
+        <div class="row" style="margin-top:10px; align-items:center;">
+          <span class="muted">考試時間：</span>
+          <button class="btn2 btn" id="btnT60">60 分</button>
+          <button class="btn2 btn" id="btnT90">90 分</button>
+          <button class="btn2 btn" id="btnT120">120 分</button>
+        </div>
+        <div class="muted" style="font-size:12px; margin-top:6px;">
+          考試模式會啟用倒數；時間到會自動交卷。練習模式不倒數。
+        </div>
+
+        <div class="divider"></div>
+
+        <label style="display:block; margin:8px 0 6px;" class="muted">題目順序</label>
         <div class="row">
           <button class="btn2 btn" id="btnShuffle">隨機洗牌</button>
           <button class="btn2 btn" id="btnOrdered">照原順序</button>
         </div>
 
-        <label style="display:block; margin:14px 0 6px;" class="muted">快捷鍵</label>
+        <div class="divider"></div>
+
+        <label style="display:block; margin:8px 0 6px;" class="muted">錯題本</label>
+        <div class="row">
+          <button class="btnOk btn" id="btnStartWrong">重測錯題</button>
+          <button class="btn2 btn" id="btnClearWrong">清除錯題本</button>
+        </div>
+        <div class="muted" style="font-size:12px; margin-top:6px;">
+          交卷後會把「答錯 + 未作答」加入錯題本。重測錯題會優先抽錯題，不足會用一般題補滿 80 題。
+        </div>
+
+        <div class="divider"></div>
+
+        <label style="display:block; margin:8px 0 6px;" class="muted">成績分析</label>
+        <div class="row">
+          <button class="btn2 btn" id="btnShowAll">全部</button>
+          <button class="btn2 btn" id="btnShowWrong">只看錯題</button>
+          <button class="btn2 btn" id="btnShowUnanswered">只看未作答</button>
+        </div>
+
+        <div style="margin-top:10px;">
+          <div class="muted" style="margin-bottom:8px;">題目導覽（交卷後會標色）</div>
+          <div id="navGrid" class="miniGrid"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <label style="display:block; margin:8px 0 6px;" class="muted">快捷鍵</label>
         <div class="muted" style="line-height:1.7;">
           <span class="kbd">←</span>/<span class="kbd">→</span> 上一題/下一題<br/>
           <span class="kbd">1-9</span> 選項作答<br/>
-          <span class="kbd">A</span> 看答案
+          <span class="kbd">A</span> 看答案<br/>
+          <span class="kbd">S</span> 交卷
         </div>
 
-        <div style="margin-top:16px;" class="muted">
-          若你有 <span class="kbd">sw.js</span>，正式版建議開啟離線快取（下方 JS 已自動註冊）。
+        <div style="margin-top:14px;" class="muted">
+          若你有 <span class="kbd">sw.js</span>，此版會自動註冊離線快取（存在才註冊，不存在不報錯）。
         </div>
       </div>
     </div>
@@ -157,26 +221,35 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
 
 <script>
 (() => {
-  const APP_VERSION = "1.1.0";
+  // ========= Config =========
+  const APP_VERSION = "1.2.0";
   const QUESTIONS_URL = "./questions_all.json";
   const PICK_COUNT = 80;
   const POINT_PER_Q = 1.25;
   const PASS_SCORE = 70;
-
-  const LS_STATE = "esg_quiz_state_v4";
-  const LS_DRAW  = `esg_draw_80_v2_${PICK_COUNT}`;
-  const LS_LAST_SCORE = "esg_last_score_v2";
-  const LS_QCACHE = "esg_questions_cache_v3";
   const FETCH_TIMEOUT_MS = 12000;
 
-  const elStatus = document.getElementById("statusPill");
+  // ========= Storage Keys =========
+  const LS_STATE = "esg_quiz_state_v5";
+  const LS_QCACHE = "esg_questions_cache_v5";
+  const LS_LAST_SCORE = "esg_last_score_v5";
+  const LS_WRONG = "esg_wrongbook_v1"; // array of ids (unique)
+  const LS_DRAW_NORMAL = "esg_draw_normal_v5";
+  const LS_DRAW_WRONG  = "esg_draw_wrong_v5";
+
+  // ========= DOM =========
+  const elStatusPill = document.getElementById("statusPill");
+  const elStatusText = document.getElementById("statusText");
+  const elTimerText = document.getElementById("timerText");
   const elQSource = document.getElementById("qSource");
   const elAppVer = document.getElementById("appVer");
+  const elSessionText = document.getElementById("sessionText");
   const elBar = document.getElementById("bar");
   const elProgress = document.getElementById("progressText");
   const elScore = document.getElementById("scoreText");
   const elArea = document.getElementById("questionArea");
   const elToast = document.getElementById("toast");
+  const elNav = document.getElementById("navGrid");
 
   const btnPrev = document.getElementById("btnPrev");
   const btnNext = document.getElementById("btnNext");
@@ -184,30 +257,53 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
   const btnSubmit = document.getElementById("btnSubmit");
   const btnReset = document.getElementById("btnReset");
   const btnRetry = document.getElementById("btnRetry");
+
   const btnShuffle = document.getElementById("btnShuffle");
   const btnOrdered = document.getElementById("btnOrdered");
+
   const modePractice = document.getElementById("modePractice");
   const modeExam = document.getElementById("modeExam");
+
+  const btnT60 = document.getElementById("btnT60");
+  const btnT90 = document.getElementById("btnT90");
+  const btnT120 = document.getElementById("btnT120");
+
+  const btnStartWrong = document.getElementById("btnStartWrong");
+  const btnClearWrong = document.getElementById("btnClearWrong");
+
+  const btnShowAll = document.getElementById("btnShowAll");
+  const btnShowWrong = document.getElementById("btnShowWrong");
+  const btnShowUnanswered = document.getElementById("btnShowUnanswered");
 
   elQSource.textContent = QUESTIONS_URL;
   elAppVer.textContent = APP_VERSION;
 
+  // ========= State =========
   const defaultState = () => ({
     version: APP_VERSION,
-    mode: "exam",          // practice | exam
-    order: "ordered",      // ordered | shuffled
+    mode: "exam",             // practice | exam
+    order: "ordered",         // ordered | shuffled
     seed: null,
     idx: 0,
-    answers: {},           // { id: optIndex }
-    reveal: {},            // { id: true }
-    submitted: false
+    answers: {},              // {id: optIndex}
+    reveal: {},               // {id: true}
+    submitted: false,
+    // exam timer
+    examDurationSec: 90 * 60, // default 90 min
+    examStartAt: null,        // timestamp when exam starts
+    // session
+    session: "normal",        // normal | wrong
+    filter: "all"             // all | wrong | unanswered (for nav highlight filter)
   });
 
   let state = loadState();
-  let bank = [];          // normalized 全題庫
-  let questions = [];     // 本次 80 題 normalized
-  let viewOrder = [];     // 80 題顯示順序（ordered/shuffled）
+
+  let bank = [];       // normalized full bank
+  let questions = [];  // selected 80 (normalized)
+  let viewOrder = [];  // indices
   let bankSize = 0;
+
+  let timerHandle = null;
 
   function loadState(){
     try{
@@ -229,19 +325,19 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
   }
 
   function setStatus(text, kind){
-    elStatus.textContent = text;
+    elStatusText.textContent = text;
     if(kind === "ok"){
-      elStatus.style.background = "rgba(34,197,94,.14)";
-      elStatus.style.borderColor = "rgba(34,197,94,.45)";
-      elStatus.style.color = "#d6ffe2";
+      elStatusPill.style.background = "rgba(34,197,94,.14)";
+      elStatusPill.style.borderColor = "rgba(34,197,94,.45)";
+      elStatusPill.style.color = "#d6ffe2";
     } else if(kind === "err"){
-      elStatus.style.background = "rgba(239,68,68,.14)";
-      elStatus.style.borderColor = "rgba(239,68,68,.45)";
-      elStatus.style.color = "#ffd2d2";
+      elStatusPill.style.background = "rgba(239,68,68,.14)";
+      elStatusPill.style.borderColor = "rgba(239,68,68,.45)";
+      elStatusPill.style.color = "#ffd2d2";
     } else {
-      elStatus.style.background = "rgba(148,163,184,.12)";
-      elStatus.style.borderColor = "rgba(148,163,184,.22)";
-      elStatus.style.color = "#b6c2d6";
+      elStatusPill.style.background = "rgba(148,163,184,.12)";
+      elStatusPill.style.borderColor = "rgba(148,163,184,.22)";
+      elStatusPill.style.color = "#b6c2d6";
     }
   }
 
@@ -266,6 +362,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
       if(!res.ok) throw new Error("HTTP " + res.status);
       return res.json();
     }, FETCH_TIMEOUT_MS);
+
     const data = await wrapped;
     try{ localStorage.setItem(LS_QCACHE, JSON.stringify({ savedAt: Date.now(), data })); }catch{}
     return data;
@@ -297,10 +394,9 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
       let ansIndex = null;
 
       if(typeof ansRaw === "number"){
-        // 支援 1-based 或 0-based
         if(Number.isInteger(ansRaw)){
-          if(ansRaw >= 1 && ansRaw <= options.length) ansIndex = ansRaw - 1;
-          else if(ansRaw >= 0 && ansRaw < options.length) ansIndex = ansRaw;
+          if(ansRaw >= 1 && ansRaw <= options.length) ansIndex = ansRaw - 1;        // 1-based
+          else if(ansRaw >= 0 && ansRaw < options.length) ansIndex = ansRaw;       // 0-based
         }
       } else if(typeof ansRaw === "string"){
         const t = ansRaw.trim().toUpperCase();
@@ -347,6 +443,19 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     return questions[viewOrder[state.idx]];
   }
 
+  function loadWrongBook(){
+    try{
+      const raw = localStorage.getItem(LS_WRONG);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    }catch{ return []; }
+  }
+  function saveWrongBook(ids){
+    const uniq = Array.from(new Set(ids));
+    localStorage.setItem(LS_WRONG, JSON.stringify(uniq));
+  }
+
   function loadLastScore(){
     try{
       const raw = localStorage.getItem(LS_LAST_SCORE);
@@ -355,7 +464,8 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     }catch{ return null; }
   }
 
-  function computeFinalScore(){
+  // ========= Scoring =========
+  function computeResult(){
     let correct = 0;
     let answered = 0;
 
@@ -366,9 +476,12 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
       if(q.ansIndex !== null && a === q.ansIndex) correct++;
     }
 
+    const wrong = answered - correct;
+    const unanswered = questions.length - answered;
     const score = Math.round((correct * POINT_PER_Q) * 100) / 100;
     const pass = score >= PASS_SCORE;
-    return { correct, answered, total: questions.length, score, pass };
+
+    return { correct, wrong, unanswered, answered, total: questions.length, score, pass };
   }
 
   function updateTop(){
@@ -376,17 +489,85 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     const total = questions.length || 0;
     const cur = total ? state.idx + 1 : 0;
     const qid = q?.id ?? "-";
-    const bank = bankSize || 0;
 
-    elProgress.textContent = `第 ${cur} / ${total} 題（題庫ID：${qid}，題庫共 ${bank} 題）`;
+    elProgress.textContent = `第 ${cur} / ${total} 題（題庫ID：${qid}，題庫共 ${bankSize || 0} 題）`;
     elBar.style.width = total ? `${(cur / total) * 100}%` : "0%";
 
-    const r = computeFinalScore();
+    const r = computeResult();
     const last = loadLastScore();
     const lastText = last ? `｜上次得分 ${last.score} 分（${last.pass ? "及格" : "未及格"}）` : "";
-    elScore.textContent = `正確 ${r.correct}・錯誤 ${Math.max(0, r.answered - r.correct)}${lastText}`;
+    elScore.textContent = `正確 ${r.correct}・錯誤 ${r.wrong}・未作答 ${r.unanswered}${lastText}`;
+
+    elSessionText.textContent = (state.session === "wrong") ? "錯題重測" : "一般";
   }
 
+  // ========= Nav grid =========
+  function buildNavGrid(){
+    const r = computeResult();
+    const filter = state.filter;
+
+    const wrongSet = new Set(getWrongIdsFromThisSession());
+    const unansweredSet = new Set(getUnansweredIdsFromThisSession());
+
+    elNav.innerHTML = questions.map((q, i) => {
+      const n = i + 1;
+      const isActive = (viewOrder[state.idx] === i);
+
+      const a = state.answers[q.id];
+      const answered = a !== undefined;
+      const ok = answered && (q.ansIndex !== null && a === q.ansIndex);
+      const bad = answered && !ok;
+
+      // after submit show ok/bad/na
+      let cls = "qdot";
+      if(isActive) cls += " active";
+      if(state.submitted){
+        if(ok) cls += " ok";
+        else if(bad) cls += " bad";
+        else cls += " na";
+      }
+
+      // filter (visual dim by not rendering)
+      if(filter === "wrong" && !wrongSet.has(q.id)) return "";
+      if(filter === "unanswered" && !unansweredSet.has(q.id)) return "";
+
+      return `<div class="${cls}" data-nav="${i}" title="第${n}題">${n}</div>`;
+    }).join("");
+
+    elNav.querySelectorAll("[data-nav]").forEach(d => {
+      d.addEventListener("click", () => {
+        const i = parseInt(d.getAttribute("data-nav"), 10);
+        const pos = viewOrder.indexOf(i);
+        if(pos >= 0){
+          state.idx = pos;
+          saveState();
+          render();
+        }
+      });
+    });
+  }
+
+  function getWrongIdsFromThisSession(){
+    const ids = [];
+    for(const q of questions){
+      const a = state.answers[q.id];
+      if(a === undefined) continue;
+      if(q.ansIndex !== null && a !== q.ansIndex) ids.push(q.id);
+    }
+    // include unanswered as wrong for wrongbook purposes later, but for filter "wrong" we want wrong+unanswered?
+    // requirement: filter "只看錯題" usually means wrong (not unanswered). We'll keep wrong only here.
+    return ids;
+  }
+  function getUnansweredIdsFromThisSession(){
+    const ids = [];
+    for(const q of questions){
+      const a = state.answers[q.id];
+      if(a === undefined) ids.push(q.id);
+    }
+    return ids;
+  }
+
+  // ========= Render =========
   function render(){
     const q = currentQuestion();
     updateTop();
@@ -394,8 +575,14 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     const total = questions.length;
     btnPrev.disabled = !q || state.idx === 0;
     btnNext.disabled = !q || state.idx === total - 1;
-    btnReveal.disabled = !q;
+
     btnSubmit.disabled = !q;
+
+    // Reveal rules:
+    // - practice: reveal allowed anytime
+    // - exam: reveal allowed only after submitted
+    const revealAllowed = (state.mode === "practice") || state.submitted;
+    btnReveal.disabled = !q || !revealAllowed;
 
     if(!q){
       elArea.innerHTML = `<div class="muted">尚未載入題庫</div>`;
@@ -405,6 +592,8 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     const chosen = state.answers[q.id];
     const isRevealed = !!state.reveal[q.id];
     const correct = q.ansIndex;
+
+    const canAnswer = !state.submitted;
 
     const optHtml = q.options.map((text, i) => {
       let cls = "opt";
@@ -417,7 +606,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
       }
 
       const label = String.fromCharCode(65 + i);
-      const disabledAttr = state.submitted ? "disabled" : "";
+      const disabledAttr = canAnswer ? "" : "disabled";
       return `
         <button class="${cls}" data-opt="${i}" ${disabledAttr}>
           <div style="display:flex; gap:10px; align-items:flex-start;">
@@ -429,8 +618,8 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     }).join("");
 
     const hint = (state.mode === "exam")
-      ? `<div class="muted" style="margin-top:10px;">考試模式：作答後不自動顯示答案，可按「看答案」揭示。</div>`
-      : `<div class="muted" style="margin-top:10px;">練習模式：可按「看答案」揭示。</div>`;
+      ? `<div class="muted" style="margin-top:10px;">考試模式：交卷前不可看答案；倒數結束會自動交卷。</div>`
+      : `<div class="muted" style="margin-top:10px;">練習模式：可隨時看答案。</div>`;
 
     const ansLine = (isRevealed && correct !== null)
       ? `<div style="margin-top:12px;"><span class="pill">正確答案：${String.fromCharCode(65 + correct)}</span></div>`
@@ -438,7 +627,7 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
 
     const resultCard = (() => {
       if(!state.submitted) return "";
-      const r = computeFinalScore();
+      const r = computeResult();
       const border = r.pass ? "rgba(34,197,94,.45)" : "rgba(239,68,68,.45)";
       const bg = r.pass ? "rgba(34,197,94,.10)" : "rgba(239,68,68,.10)";
       const color = r.pass ? "#d6ffe2" : "#ffd2d2";
@@ -446,8 +635,8 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
         <div style="margin-top:14px; padding:14px; border-radius:14px; border:1px solid ${border}; background:${bg}; color:${color};">
           <div style="font-weight:900; font-size:16px;">交卷完成</div>
           <div style="margin-top:6px;">得分：<b>${r.score.toFixed(2)}</b> 分（${r.pass ? "✅及格" : "❌未及格"}）</div>
-          <div style="margin-top:4px;">正確：${r.correct}/${r.total}　已作答：${r.answered}/${r.total}</div>
-          <div class="muted" style="margin-top:8px; color:#b6c2d6;">交卷後已鎖定作答；如需重測請按「清除進度」。</div>
+          <div style="margin-top:4px;">正確：${r.correct}/${r.total}　錯誤：${r.wrong}　未作答：${r.unanswered}</div>
+          <div class="muted" style="margin-top:8px; color:#b6c2d6;">交卷後已鎖定作答；如需重測請按「清除進度」或「重測錯題」。</div>
         </div>
       `;
     })();
@@ -466,6 +655,8 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     elArea.querySelectorAll("[data-opt]").forEach(btn => {
       btn.addEventListener("click", () => onChoose(parseInt(btn.getAttribute("data-opt"), 10)));
     });
+
+    buildNavGrid();
   }
 
   function onChoose(optIndex){
@@ -477,15 +668,16 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     state.answers[q.id] = optIndex;
     saveState();
 
-    // 練習模式可自動揭示（你不想也可關掉）
-    if(state.mode === "practice") state.reveal[q.id] = true;
-
+    // practice auto reveal optional? keep off by default. (User can press A)
     render();
   }
 
   function reveal(){
     const q = currentQuestion();
     if(!q) return;
+    const revealAllowed = (state.mode === "practice") || state.submitted;
+    if(!revealAllowed) return;
+
     state.reveal[q.id] = true;
     saveState();
     render();
@@ -507,35 +699,133 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     }
   }
 
-  function submitNow(){
+  // ========= Timer (Exam mode) =========
+  function formatMMSS(sec){
+    sec = Math.max(0, Math.floor(sec));
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+  }
+
+  function stopTimer(){
+    if(timerHandle){
+      clearInterval(timerHandle);
+      timerHandle = null;
+    }
+    elTimerText.style.display = "none";
+  }
+
+  function startTimerIfNeeded(){
+    stopTimer();
+    if(state.mode !== "exam") return;
+    if(state.submitted) return;
+
+    if(!state.examStartAt) state.examStartAt = Date.now();
+    saveState();
+
+    elTimerText.style.display = "inline-flex";
+
+    const tick = () => {
+      const elapsed = (Date.now() - state.examStartAt) / 1000;
+      const remain = state.examDurationSec - elapsed;
+
+      elTimerText.textContent = formatMMSS(remain);
+
+      // status color when low
+      if(remain <= 60){
+        setStatus("倒數中（即將到時）", "err");
+      } else {
+        setStatus("考試中", "info");
+      }
+
+      if(remain <= 0){
+        stopTimer();
+        submitNow(true);
+      }
+    };
+
+    tick();
+    timerHandle = setInterval(tick, 500);
+  }
+
+  function setExamDuration(min){
+    state.examDurationSec = min * 60;
+    state.examStartAt = null;    // restart timer next time
+    saveState();
+    toast(`考試時間：${min} 分鐘`);
+    startTimerIfNeeded();
+  }
+
+  // ========= Submit / Wrongbook =========
+  function submitNow(auto=false){
     if(!questions.length) return;
+
     if(state.submitted){
       toast("已交卷");
       render();
       return;
     }
-    const r = computeFinalScore();
+
+    // mark submitted
     state.submitted = true;
+
+    // allow reveal after submit
+    // (but we do not auto reveal; user can press A or click 看答案)
     saveState();
 
+    const r = computeResult();
     localStorage.setItem(LS_LAST_SCORE, JSON.stringify({
       score: r.score,
       correct: r.correct,
+      wrong: r.wrong,
+      unanswered: r.unanswered,
       total: r.total,
       pass: r.pass,
-      at: Date.now()
+      at: Date.now(),
+      session: state.session
     }));
 
-    toast(`交卷完成：${r.score.toFixed(2)} 分（${r.pass ? "及格" : "未及格"}）`);
+    // update wrongbook: wrong + unanswered
+    const wrongIds = [];
+    for(const q of questions){
+      const a = state.answers[q.id];
+      if(a === undefined) wrongIds.push(q.id);
+      else if(q.ansIndex !== null && a !== q.ansIndex) wrongIds.push(q.id);
+    }
+    const wb = loadWrongBook();
+    saveWrongBook(wb.concat(wrongIds));
+
+    stopTimer();
+    setStatus(auto ? "時間到，自動交卷" : "交卷完成", r.pass ? "ok" : "err");
+    toast(`${auto ? "自動交卷" : "交卷完成"}：${r.score.toFixed(2)} 分（${r.pass ? "及格" : "未及格"}）`);
     render();
   }
 
+  // ========= Mode / Order / Filter =========
   function setMode(m){
     state.mode = m;
+
+    // timer reset rules:
+    // - switching to exam: start timer fresh (unless already has startAt)
+    // - switching to practice: stop timer
+    if(m === "exam"){
+      if(state.submitted){
+        // already submitted: no timer
+      } else {
+        state.examStartAt = null; // start fresh whenever switching into exam
+      }
+    } else {
+      state.examStartAt = null;
+    }
+
     saveState();
-    toast(m === "exam" ? "切換：考試模式" : "切換：練習模式");
+
     modePractice.classList.toggle("btn", m === "practice");
     modeExam.classList.toggle("btn", m === "exam");
+
+    toast(m === "exam" ? "切換：考試模式" : "切換：練習模式");
+
+    startTimerIfNeeded();
     render();
   }
 
@@ -543,19 +833,119 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     state.order = order;
     if(order === "ordered") state.seed = null;
     buildViewOrder();
-    toast(order === "shuffled" ? "題目已洗牌" : "題目恢復原順序");
+
     btnShuffle.classList.toggle("btn", order === "shuffled");
     btnOrdered.classList.toggle("btn", order === "ordered");
+
+    toast(order === "shuffled" ? "題目已洗牌" : "題目恢復原順序");
     render();
   }
 
+  function setFilter(f){
+    state.filter = f;
+    saveState();
+
+    btnShowAll.classList.toggle("btn", f === "all");
+    btnShowWrong.classList.toggle("btn", f === "wrong");
+    btnShowUnanswered.classList.toggle("btn", f === "unanswered");
+
+    toast(f === "all" ? "顯示：全部" : f === "wrong" ? "顯示：只看錯題" : "顯示：只看未作答");
+    buildNavGrid();
+  }
+
+  // ========= Sessions (Normal / Wrong) =========
+  function pickIdsCrypto(ids){
+    // in-place Fisher-Yates using crypto
+    const arr = ids.slice();
+    for(let i = arr.length - 1; i > 0; i--){
+      const r = crypto.getRandomValues(new Uint32Array(1))[0];
+      const j = r % (i + 1);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function startNewSession(sessionType){
+    state.session = sessionType;
+    state.idx = 0;
+    state.answers = {};
+    state.reveal = {};
+    state.submitted = false;
+    state.seed = null;
+
+    // reset timer for exam
+    state.examStartAt = null;
+
+    saveState();
+  }
+
+  function buildQuestionsFromDraw(drawIds){
+    const map = new Map(bank.map(q => [q.id, q]));
+    questions = drawIds.map(id => map.get(id)).filter(Boolean);
+  }
+
+  function drawNormal(){
+    let drawIds = null;
+    try { drawIds = JSON.parse(localStorage.getItem(LS_DRAW_NORMAL) || "null"); } catch { drawIds = null; }
+
+    if(!Array.isArray(drawIds) || drawIds.length !== PICK_COUNT){
+      const ids = bank.map(q => q.id);
+      drawIds = pickIdsCrypto(ids).slice(0, PICK_COUNT);
+      localStorage.setItem(LS_DRAW_NORMAL, JSON.stringify(drawIds));
+    }
+    buildQuestionsFromDraw(drawIds);
+
+    // safety: if mismatch, re-draw
+    if(questions.length !== PICK_COUNT){
+      localStorage.removeItem(LS_DRAW_NORMAL);
+      return drawNormal();
+    }
+  }
+
+  function drawWrong(){
+    const wrongBook = loadWrongBook();
+    if(!wrongBook.length){
+      toast("錯題本是空的");
+      return false;
+    }
+
+    const wrongIds = pickIdsCrypto(wrongBook);
+
+    // fill to 80: take wrong first, then random from bank excluding those
+    const taken = new Set(wrongIds);
+    const filler = bank.map(q => q.id).filter(id => !taken.has(id));
+    const filled = wrongIds.concat(pickIdsCrypto(filler));
+
+    const drawIds = filled.slice(0, PICK_COUNT);
+    localStorage.setItem(LS_DRAW_WRONG, JSON.stringify(drawIds));
+
+    buildQuestionsFromDraw(drawIds);
+
+    if(questions.length !== PICK_COUNT){
+      localStorage.removeItem(LS_DRAW_WRONG);
+      toast("錯題重測抽題失敗，請再試一次");
+      return false;
+    }
+    return true;
+  }
+
+  // ========= Reset =========
   function resetProgress(){
-    localStorage.removeItem(LS_DRAW);
+    // keep wrongbook by default; user can clear separately
     localStorage.removeItem(LS_STATE);
+    localStorage.removeItem(LS_DRAW_NORMAL);
+    localStorage.removeItem(LS_DRAW_WRONG);
+    localStorage.removeItem(LS_LAST_SCORE);
     toast("已清除進度，將重新抽題");
     location.reload();
   }
 
+  function clearWrongBook(){
+    localStorage.removeItem(LS_WRONG);
+    toast("已清除錯題本");
+  }
+
+  // ========= Init =========
   async function init(){
     try{
       setStatus("載入題庫…", "info");
@@ -579,50 +969,38 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
       bank = normalizeQuestions(raw);
       bankSize = bank.length;
 
-      // 讀取已抽到的題目 id（避免重整就換題）
-      let drawIds = null;
-      try { drawIds = JSON.parse(localStorage.getItem(LS_DRAW) || "null"); } catch { drawIds = null; }
-
-      if(!Array.isArray(drawIds) || drawIds.length !== PICK_COUNT){
-        const ids = bank.map(q => q.id);
-
-        // Fisher-Yates shuffle（用 crypto）
-        for(let i = ids.length - 1; i > 0; i--){
-          const r = crypto.getRandomValues(new Uint32Array(1))[0];
-          const j = r % (i + 1);
-          [ids[i], ids[j]] = [ids[j], ids[i]];
+      // session draw
+      if(state.session === "wrong"){
+        // if wrong session but no wrongbook, fallback normal
+        const ok = drawWrong();
+        if(!ok){
+          state.session = "normal";
+          saveState();
+          drawNormal();
         }
-
-        drawIds = ids.slice(0, PICK_COUNT);
-        localStorage.setItem(LS_DRAW, JSON.stringify(drawIds));
-
-        state.idx = 0;
-        state.answers = {};
-        state.reveal = {};
-        state.submitted = false;
-        state.finished = false;
-        saveState();
+      } else {
+        drawNormal();
       }
 
-      const map = new Map(bank.map(q => [q.id, q]));
-      questions = drawIds.map(id => map.get(id)).filter(Boolean);
-
-      if(questions.length !== PICK_COUNT){
-        localStorage.removeItem(LS_DRAW);
-        location.reload();
-        return;
-      }
-
+      // build order
       buildViewOrder();
-      setMode(state.mode);
-      setOrder(state.order);
 
+      // init UI toggles
+      modePractice.classList.toggle("btn", state.mode === "practice");
+      modeExam.classList.toggle("btn", state.mode === "exam");
+      btnShuffle.classList.toggle("btn", state.order === "shuffled");
+      btnOrdered.classList.toggle("btn", state.order === "ordered");
+
+      setFilter(state.filter);
+
+      // enable buttons
       btnPrev.disabled = false;
       btnNext.disabled = false;
       btnReveal.disabled = false;
       btnSubmit.disabled = false;
 
       render();
+      startTimerIfNeeded();
 
       if("serviceWorker" in navigator){
         navigator.serviceWorker.register("./sw.js").catch(()=>{});
@@ -642,11 +1020,11 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     }
   }
 
-  // Events
+  // ========= Events =========
   btnPrev.addEventListener("click", prev);
   btnNext.addEventListener("click", next);
   btnReveal.addEventListener("click", reveal);
-  btnSubmit.addEventListener("click", submitNow);
+  btnSubmit.addEventListener("click", () => submitNow(false));
   btnReset.addEventListener("click", resetProgress);
   btnRetry.addEventListener("click", init);
 
@@ -656,10 +1034,38 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
   modePractice.addEventListener("click", () => setMode("practice"));
   modeExam.addEventListener("click", () => setMode("exam"));
 
+  btnT60.addEventListener("click", () => setExamDuration(60));
+  btnT90.addEventListener("click", () => setExamDuration(90));
+  btnT120.addEventListener("click", () => setExamDuration(120));
+
+  btnStartWrong.addEventListener("click", () => {
+    startNewSession("wrong");
+    const ok = drawWrong();
+    if(!ok){
+      // revert
+      state.session = "normal";
+      saveState();
+      toast("錯題本空，回到一般測驗");
+      drawNormal();
+    }
+    buildViewOrder();
+    setStatus("錯題重測", "ok");
+    render();
+    startTimerIfNeeded();
+  });
+
+  btnClearWrong.addEventListener("click", clearWrongBook);
+
+  btnShowAll.addEventListener("click", () => setFilter("all"));
+  btnShowWrong.addEventListener("click", () => setFilter("wrong"));
+  btnShowUnanswered.addEventListener("click", () => setFilter("unanswered"));
+
   window.addEventListener("keydown", (e) => {
     if(e.key === "ArrowLeft") prev();
     if(e.key === "ArrowRight") next();
+
     if(e.key.toLowerCase() === "a") reveal();
+    if(e.key.toLowerCase() === "s") submitNow(false);
 
     const n = Number(e.key);
     if(Number.isInteger(n) && n >= 1 && n <= 9){
@@ -668,6 +1074,8 @@ font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;w
     }
   });
 
+  // ========= Boot =========
+  elAppVer.textContent = APP_VERSION;
   init();
 })();
 </script>
