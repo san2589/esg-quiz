@@ -4,725 +4,173 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0f766e" />
-  <meta name="description" content="ESG 永續發展測驗 Web App" />
-  <title>ESG 測驗</title>
+  <title>ESG 永續發展測驗</title>
 
-  <!-- 基本 PWA（可留著；若你有 manifest.json 就改成你的路徑） -->
   <link rel="manifest" href="./manifest.json" />
   <link rel="icon" href="./icon.png" />
 
   <style>
-    :root { --bg:#0b1220; --card:#121a2a; --muted:#94a3b8; --text:#e5e7eb; --brand:#14b8a6; --danger:#ef4444; }
-    *{ box-sizing:border-box; }
-    body{ margin:0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial;
-          background:linear-gradient(180deg,#071023,#0b1220 40%); color:var(--text); }
-    .wrap{ max-width:980px; margin:0 auto; padding:16px; }
-    .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; }
-    .brand{ font-weight:800; letter-spacing:.5px; }
-    .pill{ font-size:12px; color:#b6c2d6; background:rgba(148,163,184,.12); border:1px solid rgba(148,163,184,.22);
-          padding:6px 10px; border-radius:999px; }
-    .card{ background:rgba(18,26,42,.92); border:1px solid rgba(148,163,184,.18);
-          border-radius:16px; padding:16px; box-shadow: 0 10px 30px rgba(0,0,0,.28); }
-    .row{ display:flex; gap:12px; flex-wrap:wrap; }
-    .grow{ flex:1 1 320px; }
-    .muted{ color:var(--muted); }
-    .btn{ appearance:none; border:0; border-radius:12px; padding:10px 12px; cursor:pointer;
-          background:rgba(20,184,166,.14); color:#c7fff6; border:1px solid rgba(20,184,166,.45); font-weight:700; }
-    .btn:hover{ filter:brightness(1.05); }
-    .btn:disabled{ opacity:.45; cursor:not-allowed; }
-    .btn2{ background:rgba(148,163,184,.12); border:1px solid rgba(148,163,184,.28); color:#e5e7eb; }
-    .btnDanger{ background:rgba(239,68,68,.14); border:1px solid rgba(239,68,68,.45); color:#ffd2d2; }
-    .opt{ width:100%; text-align:left; padding:12px 12px; border-radius:14px; border:1px solid rgba(148,163,184,.22);
-          background:rgba(2,6,23,.35); color:var(--text); cursor:pointer; }
-    .opt:hover{ border-color:rgba(20,184,166,.6); }
-    .opt.selected{ outline:2px solid rgba(20,184,166,.8); border-color:rgba(20,184,166,.8); }
-    .opt.correct{ outline:2px solid rgba(34,197,94,.85); border-color:rgba(34,197,94,.85); }
-    .opt.wrong{ outline:2px solid rgba(239,68,68,.9); border-color:rgba(239,68,68,.9); }
-    .progress{ height:10px; background:rgba(148,163,184,.14); border-radius:999px; overflow:hidden; border:1px solid rgba(148,163,184,.18); }
-    .bar{ height:100%; width:0%; background:linear-gradient(90deg, rgba(20,184,166,.85), rgba(34,197,94,.85)); }
-    .grid{ display:grid; grid-template-columns:1fr; gap:12px; }
-    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-          font-size:12px; padding:2px 6px; border-radius:8px; border:1px solid rgba(148,163,184,.25); background:rgba(2,6,23,.35); color:#d6dee9; }
-    @media (min-width: 880px){ .grid{ grid-template-columns: 1.2fr .8fr; } }
-    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:16px; padding:10px 12px;
-            background:rgba(2,6,23,.82); border:1px solid rgba(148,163,184,.25); border-radius:12px; color:#e5e7eb;
-            max-width: 92vw; box-shadow: 0 10px 30px rgba(0,0,0,.35); display:none; }
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;
+      background:#0b1220;
+      color:#e5e7eb;
+    }
+    .wrap{max-width:900px;margin:auto;padding:16px;}
+    .card{background:#121a2a;border-radius:16px;padding:16px;margin-bottom:16px;}
+    .muted{color:#94a3b8;font-size:14px;}
+    .opt{
+      width:100%;margin:8px 0;padding:12px;
+      border-radius:12px;border:1px solid #334155;
+      background:#020617;color:#e5e7eb;
+      cursor:pointer;text-align:left;
+    }
+    .opt.selected{outline:2px solid #14b8a6;}
+    .btn{
+      padding:10px 14px;border-radius:12px;
+      border:1px solid #334155;
+      background:#020617;color:#e5e7eb;
+      cursor:pointer;
+    }
+    .btn:disabled{opacity:.4;cursor:not-allowed;}
+    .barwrap{height:10px;background:#1e293b;border-radius:999px;overflow:hidden;}
+    .bar{height:100%;width:0%;background:#14b8a6;}
   </style>
 </head>
 
-<div id="fatal" style="display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;
-background:#2b0b0b;color:#ffd9d9;border:1px solid #ff6b6b;border-radius:12px;padding:10px;
-font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;white-space:pre-wrap;">
-</div>
-
-<script>
-(function(){
-  var box = document.getElementById('fatal');
-  function show(msg){
-    if(!box) return;
-    box.style.display = 'block';
-    box.textContent = msg;
-  }
-
-  window.addEventListener('error', function(e){
-    var msg = "JS Error:\n" +
-      (e && e.message ? e.message : String(e)) + "\n" +
-      (e && e.filename ? e.filename : "") + ":" +
-      (e && e.lineno ? e.lineno : "") + ":" +
-      (e && e.colno ? e.colno : "");
-    show(msg);
-  });
-
-  window.addEventListener('unhandledrejection', function(e){
-    var r = (e && e.reason) ? e.reason : e;
-    var text = (r && r.message) ? r.message : String(r);
-    show("Promise Rejection:\n" + text);
-  });
-
-  window.__showFatal = show;
-})();
-</script>
-
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div>
-        <div class="brand">ESG 測驗</div>
-        <div class="muted" style="font-size:12px;">正式上線版（fetch 題庫・穩定版）</div>
-      </div>
-      <div class="pill" id="statusPill">初始化中…</div>
-    </div>
+<div class="wrap">
 
-    <div class="grid">
-      <div class="card grow">
-        <div class="row" style="align-items:center; justify-content:space-between;">
-          <div class="muted" style="font-size:13px;">
-            題庫：<span class="kbd" id="qSource">./questions.json</span>
-            <span style="margin-left:8px;">版本：<span class="kbd" id="appVer"></span></span>
-          </div>
-          <div class="row">
-            <button class="btn2 btn" id="btnRetry" style="display:none;">重新載入題庫</button>
-            <button class="btnDanger btn" id="btnReset">清除進度</button>
-          </div>
-        </div>
-
-        <div style="margin:12px 0;">
-          <div class="progress"><div class="bar" id="bar"></div></div>
-          <div class="row" style="justify-content:space-between; margin-top:8px;">
-            <div class="muted" id="progressText">0 / 0</div>
-            <div class="muted" id="scoreText">正確 0・錯誤 0</div>
-          </div>
-        </div>
-
-        <div id="questionArea" style="margin-top:10px;">
-          <div class="muted">載入題庫中…</div>
-        </div>
-
-        <div class="row" style="margin-top:14px; justify-content:space-between;">
-          <button class="btn2 btn" id="btnPrev" disabled>上一題</button>
-          <div class="row">
-         <button class="btn2 btn" id="btnReveal" disabled>看答案</button>
-         <button class="btn2 btn" id="btnSubmit">交卷</button>
-         <button class="btn" id="btnNext" disabled>下一題</button>
-         </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div style="font-weight:800; margin-bottom:10px;">設定</div>
-
-        <label style="display:block; margin:10px 0 6px;" class="muted">模式</label>
-        <div class="row">
-          <button class="btn2 btn" id="modePractice">練習模式</button>
-          <button class="btn2 btn" id="modeExam">考試模式</button>
-        </div>
-
-        <label style="display:block; margin:14px 0 6px;" class="muted">題目順序</label>
-        <div class="row">
-          <button class="btn2 btn" id="btnShuffle">隨機洗牌</button>
-          <button class="btn2 btn" id="btnOrdered">照原順序</button>
-        </div>
-
-        <label style="display:block; margin:14px 0 6px;" class="muted">快捷鍵</label>
-        <div class="muted" style="line-height:1.7;">
-          <span class="kbd">←</span>/<span class="kbd">→</span> 上一題/下一題<br/>
-          <span class="kbd">1-9</span> 選項作答<br/>
-          <span class="kbd">A</span> 看答案
-        </div>
-
-        <div style="margin-top:16px;" class="muted">
-          若你有 <span class="kbd">sw.js</span>，正式版建議開啟離線快取（下方 JS 已自動註冊）。
-        </div>
-      </div>
-    </div>
+  <div class="card">
+    <h2>ESG 永續發展測驗</h2>
+    <div class="muted" id="status">初始化中…</div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="card">
+    <div class="barwrap"><div class="bar" id="bar"></div></div>
+    <div class="muted" id="progressText" style="margin-top:8px;"></div>
+    <div class="muted" id="scoreText"></div>
+  </div>
+
+  <div class="card" id="questionArea">載入題庫中…</div>
+
+  <div class="card">
+    <button class="btn" id="btnPrev">上一題</button>
+    <button class="btn" id="btnNext">下一題</button>
+    <button class="btn" id="btnSubmit">交卷</button>
+    <button class="btn" id="btnReset">重來</button>
+  </div>
+
+</div>
 
 <script>
 (() => {
-  // ====== 可調整設定 ======
-  const APP_VERSION = "1.0.17";         // 每次上線更新可改這裡（方便辨識＆快取策略）
   const QUESTIONS_URL = "./questions_all.json";
   const PICK_COUNT = 80;
-  const LS_DRAW = `esg_draw_80_v1_${APP_VERSION}_${PICK_COUNT}`;
-  const LS_LAST_SCORE = "esg_last_score_v1";
-  const FETCH_TIMEOUT_MS = 12000;
+  const POINT = 1.25;
+  const PASS = 70;
+  const LS_KEY = "esg_exam_v1";
 
-  // ====== DOM ======
-  const elStatus = document.getElementById("statusPill");
-  const elQSource = document.getElementById("qSource");
-  const elAppVer = document.getElementById("appVer");
-  const elBar = document.getElementById("bar");
+  const elStatus = document.getElementById("status");
+  const elArea = document.getElementById("questionArea");
   const elProgress = document.getElementById("progressText");
   const elScore = document.getElementById("scoreText");
-  const elArea = document.getElementById("questionArea");
-  const elToast = document.getElementById("toast");
-  const btnSubmit = document.getElementById("btnSubmit");
+  const elBar = document.getElementById("bar");
 
   const btnPrev = document.getElementById("btnPrev");
   const btnNext = document.getElementById("btnNext");
-  const btnReveal = document.getElementById("btnReveal");
+  const btnSubmit = document.getElementById("btnSubmit");
   const btnReset = document.getElementById("btnReset");
-  const btnRetry = document.getElementById("btnRetry");
-  const btnShuffle = document.getElementById("btnShuffle");
-  const btnOrdered = document.getElementById("btnOrdered");
 
-  const modePractice = document.getElementById("modePractice");
-  const modeExam = document.getElementById("modeExam");
+  let bank = [];
+  let exam = [];
+  let idx = 0;
+  let answers = {};
+  let finished = false;
 
-  elQSource.textContent = QUESTIONS_URL;
-  elAppVer.textContent = APP_VERSION;
-
-  // ====== State / Storage ======
-  const LS_KEY = "esg_quiz_state_v3";
-  const LS_QCACHE = "esg_questions_cache_v2"; // 本地備援題庫快取（避免臨時讀不到）
-
-  const defaultState = () => ({
-    version: APP_VERSION,
-    mode: "practice",      // practice | exam
-    order: "ordered",      // ordered | shuffled
-    seed: null,            // 洗牌用
-    idx: 0,
-    answers: {},           // {questionId: chosenIndex}
-    reveal: {},            // {questionId: true}
-    stats: { correct: 0, wrong: 0 },
-    finished: false
-  });
-
-  let state = loadState();
-  let questions = [];      // 正式題庫（跑過 normalize）
-  let viewOrder = [];      // 題目索引順序陣列（洗牌 / 原序）
-  let bankSize = 0; // 題庫總題數（例如 734）
-
-  function loadState(){
+  function save(){
+    localStorage.setItem(LS_KEY, JSON.stringify({exam,idx,answers,finished}));
+  }
+  function load(){
     try{
-      const raw = localStorage.getItem(LS_KEY);
-      if(!raw) return defaultState();
-      const obj = JSON.parse(raw);
-      // 版本不一致時仍保留使用者進度（你也可以選擇直接 reset）
-      return { ...defaultState(), ...obj, stats: { ...defaultState().stats, ...(obj.stats||{}) } };
-    }catch(e){
-      return defaultState();
-    }
-  }
-  function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
-
-  function toast(msg){
-    elToast.textContent = msg;
-    elToast.style.display = "block";
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => (elToast.style.display = "none"), 2200);
-  }
-
-  // ====== Network helpers ======
-  function withTimeout(promise, ms){
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), ms);
-    return { controller, wrapped: promise(controller.signal).finally(() => clearTimeout(t)) };
-  }
-
-  async function fetchQuestions(){
-    setStatus("載入題庫…", "info");
-    btnRetry.style.display = "none";
-
-    // cache-bust：避免 GitHub Pages / CDN 舊快取
-    const url = new URL(QUESTIONS_URL, location.href);
-    url.searchParams.set("v", APP_VERSION);
-
-    const { wrapped } = withTimeout(async (signal) => {
-      const res = await fetch(url.toString(), { cache: "no-store", signal });
-      if(!res.ok) throw new Error("HTTP " + res.status);
-      return res.json();
-    }, FETCH_TIMEOUT_MS);
-
-    const data = await wrapped;
-    // 存一份本地備援快取（題庫成功抓到就更新）
-    try{ localStorage.setItem(LS_QCACHE, JSON.stringify({ savedAt: Date.now(), data })); }catch(e){}
-    return data;
-  }
-
-  function loadCachedQuestions(){
-    try{
-      const raw = localStorage.getItem(LS_QCACHE);
-      if(!raw) return null;
-      const obj = JSON.parse(raw);
-      return obj?.data ?? null;
-    }catch(e){ return null; }
-  }
-
-  function setStatus(text, kind){
-    elStatus.textContent = text;
-    // kind: info | ok | err
-    if(kind === "ok"){
-      elStatus.style.background = "rgba(34,197,94,.14)";
-      elStatus.style.borderColor = "rgba(34,197,94,.45)";
-      elStatus.style.color = "#d6ffe2";
-    } else if(kind === "err"){
-      elStatus.style.background = "rgba(239,68,68,.14)";
-      elStatus.style.borderColor = "rgba(239,68,68,.45)";
-      elStatus.style.color = "#ffd2d2";
-    } else {
-      elStatus.style.background = "rgba(148,163,184,.12)";
-      elStatus.style.borderColor = "rgba(148,163,184,.22)";
-      elStatus.style.color = "#b6c2d6";
-    }
-  }
-
-  // ====== Normalize / Validate ======
-function normalizeQuestions(raw){
-  if(!Array.isArray(raw)) throw new Error("題庫格式不是陣列(Array)");
-
-  return raw.map((q, i) => {
-    const id = q.id ?? q.qid ?? q.no ?? (i + 1);
-    let title = (q.question ?? q.q ?? q.title ?? "").toString();
-    title = title.replace(/^\s*\d+\s*[.)、．]\s*/, ""); // 去掉開頭像「12. 」或「12、」
-    const options = q.a ?? q.options ?? q.choices ?? q.items ?? [];
-    const ansRaw = q.c ?? q.answer ?? q.correct ?? null;
-
-    if(!title.trim()) throw new Error(`第 ${i+1} 題缺少題目文字`);
-    if(!Array.isArray(options) || options.length < 2) throw new Error(`第 ${i+1} 題選項數不足`);
-
-    // 答案索引：固定採 1-based（1~N），並支援 "A"/"B"/...
-    let ansIndex = null;
-
-    if(typeof ansRaw === "number"){
-      if(Number.isInteger(ansRaw) && ansRaw >= 1 && ansRaw <= options.length){
-        ansIndex = ansRaw - 1;
+      const d = JSON.parse(localStorage.getItem(LS_KEY));
+      if(d){
+        exam=d.exam;idx=d.idx;answers=d.answers;finished=d.finished;
       }
-    } else if(typeof ansRaw === "string"){
-      const t = ansRaw.trim().toUpperCase();
-
-      // 若答案是 "1"~"N"
-      const n = Number(t);
-      if(Number.isInteger(n) && n >= 1 && n <= options.length){
-        ansIndex = n - 1;
-      } else {
-        // 若答案是 "A"/"B"/...
-        const code = t.charCodeAt(0) - 65;
-        if(code >= 0 && code < options.length) ansIndex = code;
-      }
-    }
-
-    return {
-      id,
-      title,
-      options,
-      ansIndex
-    };
-  });
-}
-
-  // ====== Order / Shuffle ======
-  function mulberry32(seed){
-    return function() {
-      let t = seed += 0x6D2B79F5;
-      t = Math.imul(t ^ t >>> 15, t | 1);
-      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-      return ((t ^ t >>> 14) >>> 0) / 4294967296;
-    }
+    }catch{}
   }
 
-  function buildViewOrder(){
-    const n = questions.length;
-    const arr = [...Array(n).keys()];
-    if(state.order === "shuffled"){
-      if(!state.seed) state.seed = (Date.now() >>> 0);
-      const rnd = mulberry32(state.seed >>> 0);
-      for(let i = arr.length - 1; i > 0; i--){
-        const j = Math.floor(rnd() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
+  function shuffle(a){
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
     }
-    viewOrder = arr;
-    // idx 安全
-    if(state.idx < 0) state.idx = 0;
-    if(state.idx > viewOrder.length - 1) state.idx = Math.max(0, viewOrder.length - 1);
-    saveState();
+    return a;
   }
 
-  function currentQuestion(){
-    if(!questions.length) return null;
-    const qi = viewOrder[state.idx];
-    return questions[qi];
-  }
-
-  // ====== Render ======
-  function updateProgress(curQ){
-  const total = questions.length;          // 本回合題數：80
-  const cur = total ? (state.idx + 1) : 0;
-
-  const qid = curQ?.id ?? "-";
-  const bank = bankSize || total;          // 題庫總數：734
-
-  elProgress.textContent = `第 ${cur} / ${total} 題（題庫ID：${qid}，題庫共 ${bank} 題）`;
-  elBar.style.width = total ? `${(cur / total) * 100}%` : "0%";
-
-  const last = loadLastScore();
-  const lastText = last ? `｜上次得分 ${last.score} 分（${last.pass ? "及格" : "未及格"}）` : "";
-  elScore.textContent = `正確 ${state.stats.correct}・錯誤 ${state.stats.wrong}${lastText}`;
-}
+  function current(){ return exam[idx]; }
 
   function render(){
-    const q = currentQuestion();
-    updateProgress(q);
-
-    btnPrev.disabled = !q || state.idx === 0;
-    btnNext.disabled = !q || state.idx === questions.length - 1;
-    btnReveal.disabled = !q;
-
-    if(!q){
-      elArea.innerHTML = `<div class="muted">尚未載入題庫</div>`;
-      return;
-    }
-
-    const chosen = state.answers[q.id];
-    const isRevealed = !!state.reveal[q.id];
-    const correct = q.ansIndex;
-
-    const optHtml = q.options.map((text, i) => {
-      let cls = "opt";
-      const isSel = chosen === i;
-      if(isSel) cls += " selected";
-
-      if(isRevealed && correct !== null){
-        if(i === correct) cls += " correct";
-        else if(isSel && i !== correct) cls += " wrong";
-      }
-
-      const label = String.fromCharCode(65 + i);
-      return `<button class="${cls}" data-opt="${i}">
-        <div style="display:flex; gap:10px; align-items:flex-start;">
-          <div class="kbd">${label}</div>
-          <div style="line-height:1.5;">${escapeHtml(String(text))}</div>
-        </div>
-      </button>`;
-    }).join("");
-
-    const hint = (state.mode === "exam")
-      ? `<div class="muted" style="margin-top:10px;">考試模式：作答後不自動顯示答案，可按「看答案」揭示。</div>`
-      : `<div class="muted" style="margin-top:10px;">練習模式：作答後可按「看答案」或直接下一題。</div>`;
-
-    const ansLine = (isRevealed && correct !== null)
-      ? `<div style="margin-top:12px;">
-          <span class="pill">正確答案：${String.fromCharCode(65 + correct)}</span>
-        </div>`
-      : "";
+    const q=current();
+    elProgress.textContent =
+      `第 ${idx+1} / ${exam.length} 題（題庫ID：${q.id}，題庫共 ${bank.length} 題）`;
+    elBar.style.width = `${((idx+1)/exam.length)*100}%`;
 
     elArea.innerHTML = `
-      <div style="font-size:18px; font-weight:900; line-height:1.5;">
-  <span class="pill" style="margin-right:8px;">題庫ID：${escapeHtml(String(q.id))}</span>
-  ${escapeHtml(q.title)}
-</div>
-      <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">${optHtml}</div>
-      ${ansLine}
-      ${hint}
+      <h3>${q.q}</h3>
+      ${q.a.map((t,i)=>`
+        <button class="opt ${answers[q.id]===i?"selected":""}" data-i="${i}">${t}</button>
+      `).join("")}
     `;
 
-    // 綁定選項點擊
-    elArea.querySelectorAll("[data-opt]").forEach(btn => {
-      btn.addEventListener("click", () => onChoose(parseInt(btn.getAttribute("data-opt"), 10)));
+    elArea.querySelectorAll(".opt").forEach(b=>{
+      b.onclick=()=>{
+        if(finished) return;
+        answers[q.id]=Number(b.dataset.i);
+        save();render();
+      };
     });
+
+    btnPrev.disabled = idx===0;
+    btnNext.disabled = idx===exam.length-1;
   }
 
-  function escapeHtml(s){
-    return s.replace(/[&<>"']/g, (c) => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[c]));
+  function submit(){
+    let correct=0;
+    exam.forEach(q=>{
+      if(answers[q.id]===q.c) correct++;
+    });
+    const score = correct*POINT;
+    finished=true;
+    save();
+    alert(`得分 ${score} 分\n${score>=PASS?"✅及格":"❌未及格"}`);
+    elScore.textContent=`得分：${score} 分`;
   }
 
-  function loadLastScore(){
-  try{
-    const raw = localStorage.getItem(LS_LAST_SCORE);
-    if(!raw) return null;
-    return JSON.parse(raw);
-  }catch(e){
-    return null;
-  }
-}
-
-// 計分規則：每題 1.25 分；80 題滿分 100；70 及格
-function computeFinalScore(){
-  let correct = 0;
-  let answered = 0;
-
-  for(const q of questions){
-    const a = state.answers[q.id];
-    if(a === undefined) continue;
-    answered += 1;
-    if(q.ansIndex !== null && a === q.ansIndex) correct += 1;
-  }
-
-  const score = Math.round((correct * 1.25) * 100) / 100; // 兩位小數
-  const pass = score >= 70;
-
-  return { correct, answered, total: questions.length, score, pass };
-}
-
-function maybeFinishAndSave(){
-  if(!questions.length) return;
-
-  const r = computeFinalScore();
-
-  // 尚未全部作答就不結算
-  if(r.answered !== r.total) return;
-
-  // 已結算過就不重複彈出
-  if(state.finished) return;
-
-  state.finished = true;
-  saveState();
-
-  // 記錄上次得分
-  localStorage.setItem(LS_LAST_SCORE, JSON.stringify({
-    score: r.score,
-    correct: r.correct,
-    total: r.total,
-    pass: r.pass,
-    at: Date.now()
-  }));
-
-  // 先用 alert（最簡單、最穩）；你要美化成卡片我再幫你做
-  alert(`作答完成！\n得分：${r.score} 分\n正確：${r.correct}/${r.total}\n${r.pass ? "✅ 及格（70）" : "❌ 未及格（70）"}`);
-
-  // 結算後刷新一次畫面（讓上次得分能顯示在右上角）
-  render();
-}
-function submitNow(){
-  if(!questions.length) return;
-  const r = computeFinalScore();
-
-  localStorage.setItem(LS_LAST_SCORE, JSON.stringify({
-    score: r.score,
-    correct: r.correct,
-    total: r.total,
-    pass: r.pass,
-    at: Date.now()
-  }));
-
-  alert(`交卷完成！\n得分：${r.score} 分\n正確：${r.correct}/${r.total}\n${r.pass ? "✅ 及格（70）" : "❌ 未及格（70）"}`);
-  render();
-}
-
-  // ====== Answer logic ======
-  function onChoose(optIndex){
-  // ====== Answer logic ======
-  function onChoose(optIndex){
-    const q = currentQuestion();
-    if(!q) return;
-
-    // 防呆
-    if(optIndex < 0 || optIndex >= q.options.length) return;
-
-    const prev = state.answers[q.id];
-    state.answers[q.id] = optIndex;
-
-    // 成績：只有「第一次作答」才計入（避免一直改答案刷分）
-    if(prev === undefined && q.ansIndex !== null){
-      if(optIndex === q.ansIndex) state.stats.correct += 1;
-      else state.stats.wrong += 1;
-    }
-
-    saveState();
-    render();
-    maybeFinishAndSave();
-  }
-
-  function reveal(){
-    const q = currentQuestion();
-    if(!q) return;
-    state.reveal[q.id] = true;
-    saveState();
-    render();
-  }
-
-  function prev(){
-    if(state.idx > 0){ state.idx -= 1; saveState(); render(); }
-  }
-  function next(){
-    if(state.idx < questions.length - 1){ state.idx += 1; saveState(); render(); }
-  }
-
-  // ====== Mode / Order ======
-  function setMode(m){
-    state.mode = m;
-    saveState();
-    toast(m === "exam" ? "切換：考試模式" : "切換：練習模式");
-    // 只做 UI 設定，不改題目
-    modePractice.classList.toggle("btn", m === "practice");
-    modeExam.classList.toggle("btn", m === "exam");
-    render();
-  }
-
-  function setOrder(order){
-    state.order = order;
-    if(order === "ordered") state.seed = null;
-    buildViewOrder();
-    toast(order === "shuffled" ? "題目已洗牌" : "題目恢復原順序");
-    btnShuffle.classList.toggle("btn", order === "shuffled");
-    btnOrdered.classList.toggle("btn", order === "ordered");
-    render();
-  }
-
-  function resetProgress(){
-    localStorage.removeItem(LS_DRAW);
-    state = defaultState();
-    saveState();
-    buildViewOrder();
-    toast("已清除進度");
-    render();
-  }
-
-  // ====== Events ======
-  btnPrev.addEventListener("click", prev);
-  btnNext.addEventListener("click", next);
-  btnReveal.addEventListener("click", reveal);
-  btnSubmit.addEventListener("click", submitNow);
-  btnReset.addEventListener("click", resetProgress);
-  btnRetry.addEventListener("click", init);
-
-  btnShuffle.addEventListener("click", () => setOrder("shuffled"));
-  btnOrdered.addEventListener("click", () => setOrder("ordered"));
-
-  modePractice.addEventListener("click", () => setMode("practice"));
-  modeExam.addEventListener("click", () => setMode("exam"));
-
-  window.addEventListener("keydown", (e) => {
-    if(e.key === "ArrowLeft") prev();
-    if(e.key === "ArrowRight") next();
-    if(e.key.toLowerCase() === "a") reveal();
-
-    // 1-9 quick choose
-    const n = Number(e.key);
-    if(Number.isInteger(n) && n >= 1 && n <= 9){
-      const q = currentQuestion();
-      if(q && n <= q.options.length) onChoose(n - 1);
-    }
-  });
-
-  // ====== Init ======
   async function init(){
-    try{
-      setStatus("載入題庫…", "info");
-      btnRetry.style.display = "none";
-
-      // 先嘗試網路抓題庫；失敗則 fallback 到 localStorage 快取
-      let raw;
-      try{
-        raw = await fetchQuestions();
-        setStatus("題庫已更新", "ok");
-      }catch(err){
-        const cached = loadCachedQuestions();
-        if(cached){
-          raw = cached;
-          setStatus("離線備援題庫", "ok");
-          toast("網路讀取失敗，改用本機備援題庫");
-        }else{
-          throw err;
-        }
-      }
-
-      const all = normalizeQuestions(raw);
-      bankSize = all.length; // 題庫共幾題（例如 734）
-
-// 讀取已抽到的題目 id（避免重整就換題）
-let drawIds = null;
-try {
-  drawIds = JSON.parse(localStorage.getItem(LS_DRAW) || "null");
-} catch (e) {
-  drawIds = null;
-}
-
-// 如果沒有抽過，就抽一組新的 80 題 id 並存起來
-if (!Array.isArray(drawIds) || drawIds.length !== PICK_COUNT) {
-  const ids = all.map(q => q.id);
-
-  // Fisher-Yates shuffle（用 crypto，比 Math.random 穩）
-  for (let i = ids.length - 1; i > 0; i--) {
-    const r = crypto.getRandomValues(new Uint32Array(1))[0];
-    const j = r % (i + 1);
-    [ids[i], ids[j]] = [ids[j], ids[i]];
+    elStatus.textContent="載入題庫…";
+    load();
+    if(!exam.length){
+      const res=await fetch(QUESTIONS_URL,{cache:"no-store"});
+      bank=await res.json();
+      exam = shuffle([...bank]).slice(0,PICK_COUNT);
+      idx=0;answers={};finished=false;
+      save();
+    }else{
+      const res=await fetch(QUESTIONS_URL,{cache:"no-store"});
+      bank=await res.json();
+    }
+    elStatus.textContent="題庫就緒";
+    render();
   }
 
-  drawIds = ids.slice(0, PICK_COUNT);
-  localStorage.setItem(LS_DRAW, JSON.stringify(drawIds));
-
-  // ✅ 新抽一批題目 → 進度回到第 1 題
-  state.idx = 0;
-  state.finished = false;
-  saveState();
-}
-
-// 依照 drawIds 組回本次要作答的 80 題（保持抽到的順序）
-const map = new Map(all.map(q => [q.id, q]));
-questions = drawIds.map(id => map.get(id)).filter(Boolean);
-
-// 防呆：如果題庫變動導致對不上，就重抽一次
-
-      if(!questions.length) throw new Error("題庫為空");
-      if (questions.length !== PICK_COUNT) {
-  localStorage.removeItem(LS_DRAW);
-  // 重新載入一次讓它依正常流程重抽
-  location.reload();
-  return;
-}
-      // 初始化 order
-      buildViewOrder();
-
-      // 初始化模式/按鈕狀態
-      setMode(state.mode);
-      setOrder(state.order);
-
-      render();
-
-      // PWA Service Worker（有 sw.js 就會註冊；沒有也不會報錯）
-      if("serviceWorker" in navigator){
-        navigator.serviceWorker.register("./sw.js").catch(()=>{});
-      }
-
-        }catch(err){
-      console.error(err);
-      setStatus("載入失敗", "err");
-      btnRetry.style.display = "inline-block";
-
-      const msg = (err && err.message) ? err.message : String(err);
-
-      elArea.innerHTML = `
-        <div style="font-weight:900; font-size:16px; color:#ffd2d2;">題庫載入失敗</div>
-        <div class="muted" style="margin-top:8px; line-height:1.7;">
-          可能原因：<br/>
-          1) questions.json 路徑不對（目前：<span class="kbd">${QUESTIONS_URL}</span>）<br/>
-          2) GitHub Pages 尚未更新 / 快取<br/>
-          3) 題庫 JSON 格式不符合（需為 Array）<br/>
-          <br/>
-          錯誤訊息：<span class="kbd">${escapeHtml(msg)}</span>
-        </div>
-      `;
-    }
-  } // ← ✅ 這行是關閉 async function init()
+  btnPrev.onclick=()=>{if(idx>0){idx--;save();render();}};
+  btnNext.onclick=()=>{if(idx<exam.length-1){idx++;save();render();}};
+  btnSubmit.onclick=submit;
+  btnReset.onclick=()=>{localStorage.removeItem(LS_KEY);location.reload();};
 
   init();
-})(); // ← ✅ 這行是關閉外層 IIFE
+})();
 </script>
 </body>
 </html>
